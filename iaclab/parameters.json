@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+        "value": "koreasouth"
+    },
+    "adminUsername": {
+      "value": "azureadmin"
+    },
+    "adminPassword": {
+      "value": "1234!@#$qwerQWER"
+    },
+    "vnetName": {
+      "value": "vnet-iac-lab"
+    },
+    "subnetName": {
+      "value": "subnet-iac-lab"
+    },
+    "vnetAddressSpace": {
+      "value": "10.0.0.0/16"
+    },
+    "subnetAddressSpace": {
+      "value": "10.0.3.0/24"
+    },
+    "allowedIPs": {
+      "value": [
+        "168.210.156.0/24",
+        "137.158.0.0/16"
+      ]
+    },
+    "dataDiskSize": {
+      "value": 32
+    }
+  }
+}
