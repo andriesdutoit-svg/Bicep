@@ -33,7 +33,7 @@
     "regions": {
       "value": {
         "wus2": "westus2",
-        "krs": "koreasouth",
+        "krc": "koreacentral",
         "sdc": "swedencentral",
         "we": "westeurope",
         "ae": "australiaeast"
@@ -41,12 +41,12 @@
     },
     "dc01RegionKey": { "value": "wus2" },
     "dc02RegionKey": { "value": "sdc" },
-    "dc03RegionKey": { "value": "krs" },
+    "dc03RegionKey": { "value": "krc" },
     "dc04RegionKey": { "value": "we" },
     "dc05RegionKey": { "value": "ae" },
     "windowsClient01RegionKey": { "value": "wus2" },
     "windowsClient02RegionKey": { "value": "sdc" },
-    "ubuntu01RegionKey": { "value": "krs" },
+    "ubuntu01RegionKey": { "value": "krc" },
     "ubuntu02RegionKey": { "value": "we" },
     "ubuntu03RegionKey": { "value": "ae" },
 
