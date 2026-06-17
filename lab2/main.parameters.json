@@ -1,0 +1,83 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "externalAccessPrefixes": {
+      "value": [
+        "168.210.156.0/24",
+        "137.158.0.0/16",
+        "197.239.0.0/16",
+        "196.24.0.0/16",
+        "196.42.0.0/16",
+        "196.47.0.0/16"
+      ]
+    },
+    "prefix": {
+      "value": "lab2"
+    },
+    "tags": {
+      "value": {
+        "environment": "lab",
+        "project": "lab2"
+      }
+    },
+    "adminUsername": {
+      "value": "azureadmin"
+    },
+    "adminPassword": {
+      "value": "1234!@#$QWERqwer"
+    },
+    "vmSize": {
+      "value": "Standard_B2ls_v2"
+    },
+    "regions": {
+      "value": {
+        "wus2": "westus2",
+        "krs": "koreasouth",
+        "sdc": "swedencentral",
+        "we": "westeurope",
+        "ae": "australiaeast"
+      }
+    },
+    "dc01RegionKey": { "value": "wus2" },
+    "dc02RegionKey": { "value": "sdc" },
+    "dc03RegionKey": { "value": "krs" },
+    "dc04RegionKey": { "value": "we" },
+    "dc05RegionKey": { "value": "ae" },
+    "windowsClient01RegionKey": { "value": "wus2" },
+    "windowsClient02RegionKey": { "value": "sdc" },
+    "ubuntu01RegionKey": { "value": "krs" },
+    "ubuntu02RegionKey": { "value": "we" },
+    "ubuntu03RegionKey": { "value": "ae" },
+
+    "windowsServerImage": {
+      "value": {
+        "publisher": "MicrosoftWindowsServer",
+        "offer": "WindowsServer",
+        "sku": "2019-Datacenter",
+        "version": "latest"
+      }
+    },
+    "windowsClientImage": {
+      "value": {
+        "publisher": "MicrosoftWindowsDesktop",
+        "offer": "windows-10",
+        "sku": "win10-22h2-ent-g2",
+        "version": "latest"
+      }
+    },
+    "ubuntuImage": {
+      "value": {
+        "publisher": "Canonical",
+        "offer": "ubuntu-24_04-lts",
+        "sku": "server",
+        "version": "latest"
+      }
+    },
+    "osDisk": {
+      "value": {
+        "storageAccountType": "Standard_LRS"
+      }
+    }
+  }
+}
