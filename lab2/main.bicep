@@ -33,10 +33,11 @@ param externalAccessPrefixes array = []
 //
 // RESOURCE GROUPS
 //
+
 resource rgs 'Microsoft.Resources/resourceGroups@2022-09-01' = [
-  for regionKey in keys(regions): {
-    name: '${prefix}-rg-${regionKey}'
-    location: regions[regionKey]
+  for region in items(regions): {
+    name: '${prefix}-rg-${region.key}'
+    location: region.value
     tags: tags
   }
 ]
@@ -45,12 +46,15 @@ resource rgs 'Microsoft.Resources/resourceGroups@2022-09-01' = [
 // VNets
 //
 module vnets 'modules/networking/vnet.bicep' = [
-  for (regionKey, i) in items(regions): {
-    name: 'vnet-${regionKey}'
-    scope: resourceGroup('${prefix}-rg-${regionKey}')
+  for (region, i) in items(regions): {
+    name: 'vnet-${region.key}'
+    scope: resourceGroup('${prefix}-rg-${region.key}')
+    dependsOn: [
+      rgs
+    ]
     params: {
-      vnetName: '${prefix}-vnet-${regionKey}'
-      location: regions[regionKey]
+      vnetName: '${prefix}-vnet-${region.key}'
+      location: region.value
       addressPrefix: '10.${i}.0.0/16'
       subnetPrefix: '10.${i}.0.0/24'
       dnsServers: []
@@ -61,56 +65,40 @@ module vnets 'modules/networking/vnet.bicep' = [
 ]
 
 //
-// BUILD PEERING MAP
+// PEERING (explicit)
 //
 
-// Convert regions into a usable indexed list
-var regionList = items(regions)
+// wus2 → krc
+module peering_wus2_krc 'modules/peering/peering.bicep' = {
+  name: 'peering-wus2-krc'
+  scope: resourceGroup('${prefix}-rg-wus2')
 
-// Build all unique VNet peering pairs (full mesh)
-var peeringPairs = [
-  for i in range(0, length(regionList)): [
-    for j in range(i + 1, length(regionList)): {
-
-      vnetAName: '${prefix}-vnet-${regionList[i].key}'
-      vnetBName: '${prefix}-vnet-${regionList[j].key}'
-
-      vnetAId: resourceId(
-        subscription().subscriptionId,
-        '${prefix}-rg-${regionList[i].key}',
-        'Microsoft.Network/virtualNetworks',
-        '${prefix}-vnet-${regionList[i].key}'
-      )
-
-      vnetBId: resourceId(
-        subscription().subscriptionId,
-        '${prefix}-rg-${regionList[j].key}',
-        'Microsoft.Network/virtualNetworks',
-        '${prefix}-vnet-${regionList[j].key}'
-      )
-
-      rgA: '${prefix}-rg-${regionList[i].key}'
-      rgB: '${prefix}-rg-${regionList[j].key}'
-    }
-  ]
-]
-
-// Flatten nested arrays into a single array
-var peeringsFlat = flatten(peeringPairs)
-
-//
-// DEPLOY PEERING MODULE
-//
-module peering 'modules/peering/peering.bicep' = {
-  name: 'peer-all'
   dependsOn: [
     vnets
   ]
+
   params: {
-    peerings: peeringsFlat
+    vnetName: '${prefix}-vnet-wus2'
+    remoteVnetName: '${prefix}-vnet-krc'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-krc/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-krc'
   }
 }
 
+// krc → wus2
+module peering_krc_wus2 'modules/peering/peering.bicep' = {
+  name: 'peering-krc-wus2'
+  scope: resourceGroup('${prefix}-rg-krc')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-krc'
+    remoteVnetName: '${prefix}-vnet-wus2'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-wus2/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-wus2'
+  }
+}
 
 //
 // DOMAIN CONTROLLERS
@@ -120,7 +108,6 @@ module dc01 'modules/compute/vm-windows.bicep' = {
   scope: resourceGroup('${prefix}-rg-${dc01RegionKey}')
   dependsOn: [
     vnets
-    peering
   ]
   params: {
     vmName: '${prefix}-dc01'
@@ -140,7 +127,6 @@ module dc02 'modules/compute/vm-windows.bicep' = {
   scope: resourceGroup('${prefix}-rg-${dc02RegionKey}')
   dependsOn: [
     vnets
-    peering
   ]
   params: {
     vmName: '${prefix}-dc02'
@@ -160,7 +146,6 @@ module dc03 'modules/compute/vm-windows.bicep' = {
   scope: resourceGroup('${prefix}-rg-${dc03RegionKey}')
   dependsOn: [
     vnets
-    peering
   ]
   params: {
     vmName: '${prefix}-dc03'
@@ -180,7 +165,6 @@ module dc04 'modules/compute/vm-windows.bicep' = {
   scope: resourceGroup('${prefix}-rg-${dc04RegionKey}')
   dependsOn: [
     vnets
-    peering
   ]
   params: {
     vmName: '${prefix}-dc04'
@@ -200,7 +184,6 @@ module dc05 'modules/compute/vm-windows.bicep' = {
   scope: resourceGroup('${prefix}-rg-${dc05RegionKey}')
   dependsOn: [
     vnets
-    peering
   ]
   params: {
     vmName: '${prefix}-dc05'
@@ -223,7 +206,6 @@ module win01 'modules/compute/vm-windows.bicep' = {
   scope: resourceGroup('${prefix}-rg-${windowsClient01RegionKey}')
   dependsOn: [
     vnets
-    peering
   ]
   params: {
     vmName: '${prefix}-win01'
@@ -243,7 +225,6 @@ module win02 'modules/compute/vm-windows.bicep' = {
   scope: resourceGroup('${prefix}-rg-${windowsClient02RegionKey}')
   dependsOn: [
     vnets
-    peering
   ]
   params: {
     vmName: '${prefix}-win02'
@@ -267,13 +248,13 @@ module ubu01 'modules/compute/vm-linux.bicep' = {
   scope: resourceGroup('${prefix}-rg-${ubuntu01RegionKey}')
   dependsOn: [
     vnets
-    peering
   ]
   params: {
     vmName: '${prefix}-ubu01'
     vnetName: '${prefix}-vnet-${ubuntu01RegionKey}'
     vmSize: vmSize
     adminUsername: adminUsername
+    adminPassword: adminPassword
     tags: tags
 
     image: ubuntuImage               
@@ -286,13 +267,13 @@ module ubu02 'modules/compute/vm-linux.bicep' = {
   scope: resourceGroup('${prefix}-rg-${ubuntu02RegionKey}')
   dependsOn: [
     vnets
-    peering
   ]
   params: {
     vmName: '${prefix}-ubu02'
     vnetName: '${prefix}-vnet-${ubuntu02RegionKey}'
     vmSize: vmSize
     adminUsername: adminUsername
+    adminPassword: adminPassword
     tags: tags
 
     image: ubuntuImage               
@@ -305,13 +286,13 @@ module ubu03 'modules/compute/vm-linux.bicep' = {
   scope: resourceGroup('${prefix}-rg-${ubuntu03RegionKey}')
   dependsOn: [
     vnets
-    peering
   ]
   params: {
     vmName: '${prefix}-ubu03'
     vnetName: '${prefix}-vnet-${ubuntu03RegionKey}'
     vmSize: vmSize
     adminUsername: adminUsername
+    adminPassword: adminPassword
     tags: tags
 
     image: ubuntuImage               

@@ -13,7 +13,7 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2022-07-01' = {
   properties: {
     securityRules: [
       {
-        name: 'Allow-AD'
+        name: 'Allow-AD-Internal-And-Parameter-External'
         properties: {
           priority: 100
           direction: 'Inbound'

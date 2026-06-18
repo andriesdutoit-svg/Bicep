@@ -2,8 +2,11 @@ param vmName string
 param vnetName string
 param vmSize string
 param adminUsername string
+@secure()
 param adminPassword string
 param tags object = {}
+param image object
+param osDisk object
 
 resource nic 'Microsoft.Network/networkInterfaces@2022-07-01' = {
   name: '${vmName}-nic'
@@ -16,7 +19,10 @@ resource nic 'Microsoft.Network/networkInterfaces@2022-07-01' = {
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, 'default')
+            id: resourceId(
+              'Microsoft.Network/virtualNetworks/subnets',
+               vnetName,
+                '${vnetName}-subnet-default')
           }
         }
       }
@@ -38,16 +44,11 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-08-01' = {
       adminPassword: adminPassword
     }
     storageProfile: {
-      imageReference: {
-        publisher: 'MicrosoftWindowsServer'
-        offer: 'WindowsServer'
-        sku: '2019-Datacenter'
-        version: 'latest'
-      }
+      imageReference: image
       osDisk: {
         createOption: 'FromImage'
         managedDisk: {
-          storageAccountType: 'Standard_LRS'
+          storageAccountType: osDisk.storageAccountType
         }
       }
     }

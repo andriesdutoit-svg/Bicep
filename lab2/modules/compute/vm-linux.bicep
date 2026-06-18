@@ -2,7 +2,11 @@ param vmName string
 param vnetName string
 param vmSize string
 param adminUsername string
+@secure()
+param adminPassword string
 param tags object = {}
+param image object
+param osDisk object
 
 resource nic 'Microsoft.Network/networkInterfaces@2022-07-01' = {
   name: '${vmName}-nic'
@@ -15,7 +19,10 @@ resource nic 'Microsoft.Network/networkInterfaces@2022-07-01' = {
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, 'default')
+            id: resourceId(
+              'Microsoft.Network/virtualNetworks/subnets',
+               vnetName,
+                '${vnetName}-subnet-default')
           }
         }
       }
@@ -34,21 +41,17 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-08-01' = {
     osProfile: {
       computerName: vmName
       adminUsername: adminUsername
+      adminPassword: adminPassword
       linuxConfiguration: {
         disablePasswordAuthentication: false
       }
     }
     storageProfile: {
-      imageReference: {
-        publisher: 'Canonical'
-        offer: '0001-com-ubuntu-server-jammy'
-        sku: '22_04-lts'
-        version: 'latest'
-      }
+      imageReference: image
       osDisk: {
         createOption: 'FromImage'
         managedDisk: {
-          storageAccountType: 'Standard_LRS'
+          storageAccountType: osDisk.storageAccountType
         }
       }
     }

@@ -1,41 +1,23 @@
-targetScope = 'subscription'
+targetScope = 'resourceGroup'
 
-param peerings array
+param vnetName string
+param remoteVnetName string
+param remoteVnetId string
 
-// A → B
-resource peerAtoB 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2022-07-01' = [
-  for p in peerings: {
-    name: '${p.vnetAName}/${p.vnetAName}-to-${p.vnetBName}-peering'
-    
-    scope: resourceGroup(p.rgA)
+resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' existing = {
+  name: vnetName
+}
 
-    properties: {
-      remoteVirtualNetwork: {
-        id: p.vnetBId
-      }
-      allowVirtualNetworkAccess: true
-      allowForwardedTraffic: true
-      allowGatewayTransit: false
-      useRemoteGateways: false
+resource peering 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2022-07-01' = {
+  name: '${vnet.name}/${vnet.name}-to-${remoteVnetName}'
+
+  properties: {
+    remoteVirtualNetwork: {
+      id: remoteVnetId
     }
+    allowVirtualNetworkAccess: true
+    allowForwardedTraffic: true
+    allowGatewayTransit: false
+    useRemoteGateways: false
   }
-]
-
-// B → A
-resource peerBtoA 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2022-07-01' = [
-  for p in peerings: {
-    name: '${p.vnetBName}/${p.vnetBName}-to-${p.vnetAName}-peering'
-    
-    scope: resourceGroup(p.rgB)
-
-    properties: {
-      remoteVirtualNetwork: {
-        id: p.vnetAId
-      }
-      allowVirtualNetworkAccess: true
-      allowForwardedTraffic: true
-      allowGatewayTransit: false
-      useRemoteGateways: false
-    }
-  }
-]
+}
