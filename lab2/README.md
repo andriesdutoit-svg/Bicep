@@ -25,7 +25,9 @@ The following components are created dynamically based on the `regions` paramete
 - Resource Groups (per region)
 - VNets (per region)
 - Subnets (per VNet)
-- Full mesh VNet peering
+
+### Peering
+- Manual VNet peering
 
 ### Workload Layer
 
