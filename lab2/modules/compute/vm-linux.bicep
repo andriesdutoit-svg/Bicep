@@ -81,22 +81,8 @@ resource networkTestLinux 'Microsoft.Compute/virtualMachines/extensions@2023-03-
     type: 'CustomScript'
     typeHandlerVersion: '2.1'
     settings: {
-      commandToExecute: '''
-        bash -c '
-        sleep 60
+      commandToExecute: 'bash -c "sleep 60 && mkdir -p /tmp/network-test && for t in ${join(testTargets, ' ')}; do if [ $t != ${privateIp} ]; then nc -zv $t 3389 >> /tmp/network-test/network-test.txt 2>&1; fi; done"'
 
-        mkdir -p /tmp/network-test
-
-        targets="${join(testTargets, ' ')}"
-        self="${privateIp}"
-
-        for t in $targets; do
-          if [ "$t" != "$self" ]; then
-            nc -zv $t 3389 >> /tmp/network-test/network-test.txt 2>&1
-          fi
-          done
-        '
-        '''
     }
   }
 }
