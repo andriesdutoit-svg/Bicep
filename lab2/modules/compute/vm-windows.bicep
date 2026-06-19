@@ -65,10 +65,10 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-08-01' = {
   }
 }
 
-//Enable ICMP (ping) on the VM by adding a Custom Script Extension that runs a PowerShell command to enable the appropriate firewall rule.
+//Enable ICMP (ping) and test network connectivity.
 
-resource enablePing 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = {
-  name: '${vmName}/enablePing'
+resource vmScript 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = {
+  name: '${vmName}/vmScript'
   location: location
   dependsOn: [
     vm
@@ -79,39 +79,26 @@ resource enablePing 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = 
     typeHandlerVersion: '1.10'
     settings: {
       commandToExecute: '''
-        powershell -Command "
-        Enable-NetFirewallRule -DisplayGroup 'File and Printer Sharing'
-        "
-      '''
-    }
+powershell -Command "
+Start-Sleep -Seconds 60
+
+# Enable ping
+Enable-NetFirewallRule -DisplayGroup 'File and Printer Sharing'
+
+# Network test
+$targets = '${join(testTargets, ',')}'
+$targets = $targets.Split(',')
+$self = '${privateIp}'
+
+New-Item -Path C:\temp -ItemType Directory -Force
+
+foreach ($t in $targets) {
+  if ($t -ne $self) {
+    Test-NetConnection $t -Port 3389 | Out-File -Append C:\temp\network-test.txt
   }
 }
-
-//Add Custom Script Extension to test network connectivity from the VM to a list of target IP addresses (which will be the private IPs of the other VMs). The script will run Test-NetConnection for each target and output the results to a text file on the VM.
-
-resource networkTest 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = {
-  name: '${vmName}/networkTest'
-  location: location
-  dependsOn: [
-    vm
-    enablePing
-  ]
-  properties: {
-    publisher: 'Microsoft.Compute'
-    type: 'CustomScriptExtension'
-    typeHandlerVersion: '1.10'
-    settings: {
-    commandToExecute: '''
-      powershell -Command "
-      $targets = @(${join(testTargets, ',')})
-      $self = '${privateIp}'
-      New-Item -Path C:\temp -ItemType Directory -Force
-      foreach ($t in $targets) {
-        if ($t -ne $self) {
-          Test-NetConnection $t -Port 3389 | Out-File -Append C:\temp\network-test.txt
-        }
-      }"
-      '''
+"
+'''
     }
   }
 }

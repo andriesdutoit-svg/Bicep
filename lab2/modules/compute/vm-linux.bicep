@@ -82,17 +82,20 @@ resource networkTestLinux 'Microsoft.Compute/virtualMachines/extensions@2023-03-
     typeHandlerVersion: '2.1'
     settings: {
       commandToExecute: '''
-        bash -c "
+        bash -c '
+        sleep 60
+
         mkdir -p /tmp/network-test
-        targets=(${join(testTargets, ' ')})
-        self='${privateIp}'
+
+        targets="${join(testTargets, ' ')}"
+        self="${privateIp}"
 
         for t in $targets; do
-          if [ \"$t\" != \"$self\" ]; then
+          if [ "$t" != "$self" ]; then
             nc -zv $t 3389 >> /tmp/network-test/network-test.txt 2>&1
           fi
-        done
-        "
+          done
+        '
         '''
     }
   }

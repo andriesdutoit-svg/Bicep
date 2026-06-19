@@ -10,6 +10,18 @@
 
 
 
+\# Start all VMs
+
+
+
+az vm list --query "\[?starts\_with(name,'lab2-')].id" -o tsv | ForEach-Object {
+
+&#x20; az vm start --ids $\_
+
+}
+
+
+
 \# Step 1: Retrieve VM names and private IPs from Azure
 
 $vms = az vm list-ip-addresses `
