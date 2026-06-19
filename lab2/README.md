@@ -1,53 +1,60 @@
-# Azure Multi-Region AD Lab (Bicep)
+# Azure Multi-Region Lab (v1.5)
 
 ## Overview
 
-This project deploys a **multi-region Azure lab environment** using Bicep.  
-It includes:
+This project deploys a multi-region Azure environment using Bicep, including networking, compute, and automated post-deployment validation.
 
-- Multiple Virtual Networks (VNets)
-- Full mesh VNet peering
-- Distributed Domain Controllers
-- Windows client VMs
-- Ubuntu Linux VMs
-- Network Security Groups with controlled internal and optional external access
-
-The design is **fully parameter-driven**, allowing easy scaling and reconfiguration.
+Version 1.5 introduces a fully automated Infrastructure as Code (IaC) deployment, replacing the previously manual setup.
 
 ---
 
 ## Architecture
 
-### Infrastructure Layer
-
-The following components are created dynamically based on the `regions` parameter:
-
-- Resource Groups (per region)
-- VNets (per region)
-- Subnets (per VNet)
-
-### Peering
-- Manual VNet peering
-
-### Workload Layer
-
-Virtual machines are explicitly placed into regions:
-
-- 5 Domain Controllers
-- 2 Windows client VMs
-- 2 Ubuntu Linux VMs
+- 5 Azure regions
+- Separate resource group per region
+- One VNet per region
+- Full mesh VNet peering (defined in Bicep)
+- Domain Controllers, Windows clients, and Linux servers deployed across regions
 
 ---
 
-## Regions
+## Key Features
 
-Defined in `main.parameters.json`:
+### Infrastructure as Code
+- Modular Bicep templates
+- Subscription-level deployment
+- Consistent naming and tagging strategy (`project=lab2`)
 
-```json
-"regions": {
-  "wus2": "westus2",
-  "krc": "koreacentral",
-  "sdc": "swedencentral",
-  "we": "westeurope",
-  "ae": "australiaeast"
-}
+### Networking
+- Multi-region VNet architecture
+- Full mesh VNet peering (manually defined in Bicep)
+- Network Security Groups configured for required traffic
+
+### Compute
+- Windows Server (Domain Controllers)
+- Windows client VMs
+- Ubuntu Linux servers
+
+### Connectivity Enablement
+- RDP (port 3389) enabled via NSGs
+
+### Automated Connectivity Testing
+- Windows VMs:
+  - PowerShell test scripts
+  - Output: `C:\temp\network-test.txt`
+- Linux VMs:
+  - `nc` (netcat) port testing
+  - Output: `/tmp/network-test/network-test.txt`
+
+Cross-VM connectivity is validated automatically after deployment.
+
+---
+
+## Deployment
+
+```bash
+az deployment sub create \
+  --name lab2-v1-5 \
+  --location westeurope \
+  --template-file main.bicep \
+  --parameters @main.parameters.json
