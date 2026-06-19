@@ -68,19 +68,119 @@ module vnets 'modules/networking/vnet.bicep' = [
 // PEERING (explicit)
 //
 
-// wus2 → krc
-module peering_wus2_krc 'modules/peering/peering.bicep' = {
-  name: 'peering-wus2-krc'
-  scope: resourceGroup('${prefix}-rg-wus2')
+//FROM AE TO ALL OTHER REGIONS
+
+// ae → krc
+module peering_ae_krc 'modules/peering/peering.bicep' = {
+  name: 'peering-ae-krc'
+  scope: resourceGroup('${prefix}-rg-ae')
 
   dependsOn: [
     vnets
   ]
 
   params: {
-    vnetName: '${prefix}-vnet-wus2'
+    vnetName: '${prefix}-vnet-ae'
     remoteVnetName: '${prefix}-vnet-krc'
     remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-krc/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-krc'
+  }
+}
+
+// ae → sdc
+module peering_ae_sdc 'modules/peering/peering.bicep' = {
+  name: 'peering-ae-sdc'
+  scope: resourceGroup('${prefix}-rg-ae')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-ae'
+    remoteVnetName: '${prefix}-vnet-sdc'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-sdc/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-sdc'
+  }
+}
+
+// ae → we
+module peering_ae_we 'modules/peering/peering.bicep' = {
+  name: 'peering-ae-we'
+  scope: resourceGroup('${prefix}-rg-ae')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-ae'
+    remoteVnetName: '${prefix}-vnet-we'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-we/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-we'
+  }
+}
+
+// ae → wus2
+module peering_ae_wus2 'modules/peering/peering.bicep' = {
+  name: 'peering-ae-wus2'
+  scope: resourceGroup('${prefix}-rg-ae')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-ae'
+    remoteVnetName: '${prefix}-vnet-wus2'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-wus2/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-wus2'
+  }
+}
+
+//FROM KRC TO ALL OTHER REGIONS
+
+// krc → ae
+module peering_krc_ae 'modules/peering/peering.bicep' = {
+  name: 'peering-krc-ae'
+  scope: resourceGroup('${prefix}-rg-krc')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-krc'
+    remoteVnetName: '${prefix}-vnet-ae'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-ae/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-ae'
+  }
+}
+
+// krc → sdc
+module peering_krc_sdc 'modules/peering/peering.bicep' = {
+  name: 'peering-krc-sdc'
+  scope: resourceGroup('${prefix}-rg-krc')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-krc'
+    remoteVnetName: '${prefix}-vnet-sdc'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-sdc/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-sdc'
+  }
+}
+
+// krc → we
+module peering_krc_we 'modules/peering/peering.bicep' = {
+  name: 'peering-krc-we'
+  scope: resourceGroup('${prefix}-rg-krc')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-krc'
+    remoteVnetName: '${prefix}-vnet-we'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-we/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-we'
   }
 }
 
@@ -97,6 +197,204 @@ module peering_krc_wus2 'modules/peering/peering.bicep' = {
     vnetName: '${prefix}-vnet-krc'
     remoteVnetName: '${prefix}-vnet-wus2'
     remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-wus2/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-wus2'
+  }
+}
+
+//FROM SDC TO ALL OTHER REGIONS
+
+// sdc → ae
+module peering_sdc_ae 'modules/peering/peering.bicep' = {
+  name: 'peering-sdc-ae'
+  scope: resourceGroup('${prefix}-rg-sdc')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-sdc'
+    remoteVnetName: '${prefix}-vnet-ae'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-ae/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-ae'
+  }
+}
+
+// sdc → krc
+module peering_sdc_krc 'modules/peering/peering.bicep' = {
+  name: 'peering-sdc-krc'
+  scope: resourceGroup('${prefix}-rg-sdc')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-sdc'
+    remoteVnetName: '${prefix}-vnet-krc'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-krc/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-krc'
+  }
+}
+
+// sdc → we
+module peering_sdc_we 'modules/peering/peering.bicep' = {
+  name: 'peering-sdc-we'
+  scope: resourceGroup('${prefix}-rg-sdc')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-sdc'
+    remoteVnetName: '${prefix}-vnet-we'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-we/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-we'
+  }
+}
+
+// sdc → wus2
+module peering_sdc_wus2 'modules/peering/peering.bicep' = {
+  name: 'peering-sdc-wus2'
+  scope: resourceGroup('${prefix}-rg-sdc')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-sdc'
+    remoteVnetName: '${prefix}-vnet-wus2'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-wus2/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-wus2'
+  }
+}
+
+//FROM WE TO ALL OTHER REGIONS
+
+// we → ae
+module peering_we_ae 'modules/peering/peering.bicep' = {
+  name: 'peering-we-ae'
+  scope: resourceGroup('${prefix}-rg-we')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-we'
+    remoteVnetName: '${prefix}-vnet-ae'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-ae/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-ae'
+  }
+}
+
+// we → krc
+module peering_we_krc 'modules/peering/peering.bicep' = {
+  name: 'peering-we-krc'
+  scope: resourceGroup('${prefix}-rg-we')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-we'
+    remoteVnetName: '${prefix}-vnet-krc'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-krc/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-krc'
+  }
+}
+
+// we → sdc
+module peering_we_sdc 'modules/peering/peering.bicep' = {
+  name: 'peering-we-sdc'
+  scope: resourceGroup('${prefix}-rg-we')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-we'
+    remoteVnetName: '${prefix}-vnet-sdc'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-sdc/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-sdc'
+  }
+}
+
+// we → wus2
+module peering_we_wus2 'modules/peering/peering.bicep' = {
+  name: 'peering-we-wus2'
+  scope: resourceGroup('${prefix}-rg-we')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-we'
+    remoteVnetName: '${prefix}-vnet-wus2'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-wus2/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-wus2'
+  }
+}
+
+//FROM WUS2 TO ALL OTHER REGIONS
+
+// wus2 → ae
+module peering_wus2_ae 'modules/peering/peering.bicep' = {
+  name: 'peering-wus2-ae'
+  scope: resourceGroup('${prefix}-rg-wus2')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-wus2'
+    remoteVnetName: '${prefix}-vnet-ae'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-ae/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-ae'
+  }
+}
+
+// wus2 → krc
+module peering_wus2_krc 'modules/peering/peering.bicep' = {
+  name: 'peering-wus2-krc'
+  scope: resourceGroup('${prefix}-rg-wus2')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-wus2'
+    remoteVnetName: '${prefix}-vnet-krc'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-krc/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-krc'
+  }
+}
+
+// wus2 → sdc
+module peering_wus2_sdc 'modules/peering/peering.bicep' = {
+  name: 'peering-wus2-sdc'
+  scope: resourceGroup('${prefix}-rg-wus2')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-wus2'
+    remoteVnetName: '${prefix}-vnet-sdc'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-sdc/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-sdc'
+  }
+}
+
+// wus2 → we
+module peering_wus2_we 'modules/peering/peering.bicep' = {
+  name: 'peering-wus2-we'
+  scope: resourceGroup('${prefix}-rg-wus2')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-wus2'
+    remoteVnetName: '${prefix}-vnet-we'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-we/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-we'
   }
 }
 
