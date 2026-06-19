@@ -7,6 +7,9 @@ param adminPassword string
 param tags object = {}
 param image object
 param osDisk object
+param privateIp string
+param testTargets array
+param location string
 
 resource nic 'Microsoft.Network/networkInterfaces@2022-07-01' = {
   name: '${vmName}-nic'
@@ -61,6 +64,36 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-08-01' = {
           id: nic.id
         }
       ]
+    }
+  }
+}
+
+// Extension to test network connectivity to other VMs
+
+resource networkTestLinux 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = {
+  name: '${vmName}/networkTest'
+  location: location
+  dependsOn: [
+    vm
+  ]
+  properties: {
+    publisher: 'Microsoft.Azure.Extensions'
+    type: 'CustomScript'
+    typeHandlerVersion: '2.1'
+    settings: {
+      commandToExecute: '''
+        bash -c "
+        mkdir -p /tmp/network-test
+        targets=(${join(testTargets, ' ')})
+        self='${privateIp}'
+
+        for t in $targets; do
+          if [ \"$t\" != \"$self\" ]; then
+            nc -zv $t 3389 >> /tmp/network-test/network-test.txt 2>&1
+          fi
+        done
+        "
+        '''
     }
   }
 }

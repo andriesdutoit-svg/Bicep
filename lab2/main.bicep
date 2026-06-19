@@ -30,6 +30,36 @@ param ubuntuImage object
 
 param externalAccessPrefixes array = []
 
+//VM IPs for ping enable and testing connectivity between VMs in different regions, need to allow ICMP traffic for testing purposes.
+
+var vmIps = {
+  dc01: '10.4.0.5'
+  dc02: '10.2.0.4'
+  dc03: '10.1.0.4'
+  dc04: '10.3.0.5'
+  dc05: '10.0.0.4'
+  win01: '10.4.0.4'
+  win02: '10.2.0.5'
+  ubu01: '10.1.0.5'
+  ubu02: '10.3.0.4'
+  ubu03: '10.0.0.5'
+}
+
+
+var vmIpArray = [
+  vmIps.dc01
+  vmIps.dc02
+  vmIps.dc03
+  vmIps.dc04
+  vmIps.dc05
+  vmIps.win01
+  vmIps.win02
+  vmIps.ubu01
+  vmIps.ubu02
+  vmIps.ubu03
+]
+
+
 //
 // RESOURCE GROUPS
 //
@@ -413,6 +443,9 @@ module dc01 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
+    privateIp: vmIps.dc01
+    testTargets: vmIpArray
+    location: regions[dc01RegionKey]
     tags: tags
    
     image: windowsServerImage     
@@ -432,8 +465,10 @@ module dc02 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
+    privateIp: vmIps.dc02
+    testTargets: vmIpArray
     tags: tags
-    
+    location: regions[dc02RegionKey]
     image: windowsServerImage     
     osDisk: osDisk                
   }
@@ -451,6 +486,9 @@ module dc03 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
+    privateIp: vmIps.dc03
+    testTargets: vmIpArray
+    location: regions[dc03RegionKey]
     tags: tags
 
     image: windowsServerImage     
@@ -470,6 +508,9 @@ module dc04 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
+    privateIp: vmIps.dc04
+    testTargets: vmIpArray
+    location: regions[dc04RegionKey]
     tags: tags
 
     image: windowsServerImage     
@@ -489,6 +530,9 @@ module dc05 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
+    privateIp: vmIps.dc05
+    testTargets: vmIpArray
+    location: regions[dc05RegionKey]
     tags: tags
 
     image: windowsServerImage     
@@ -511,6 +555,9 @@ module win01 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
+    privateIp: vmIps.win01
+    testTargets: vmIpArray
+    location: regions[windowsClient01RegionKey]
     tags: tags
 
     image: windowsClientImage     
@@ -530,6 +577,9 @@ module win02 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
+    privateIp: vmIps.win02
+    testTargets: vmIpArray
+    location: regions[windowsClient02RegionKey]
     tags: tags
 
     image: windowsClientImage     
@@ -553,6 +603,9 @@ module ubu01 'modules/compute/vm-linux.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
+    privateIp: vmIps.ubu01
+    testTargets: vmIpArray
+    location: regions[ubuntu01RegionKey]
     tags: tags
 
     image: ubuntuImage               
@@ -572,6 +625,9 @@ module ubu02 'modules/compute/vm-linux.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
+    privateIp: vmIps.ubu02
+    testTargets: vmIpArray
+    location: regions[ubuntu02RegionKey]
     tags: tags
 
     image: ubuntuImage               
@@ -591,6 +647,9 @@ module ubu03 'modules/compute/vm-linux.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
+    privateIp: vmIps.ubu03
+    testTargets: vmIpArray
+    location: regions[ubuntu03RegionKey]
     tags: tags
 
     image: ubuntuImage               
