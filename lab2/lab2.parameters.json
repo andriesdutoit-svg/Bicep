@@ -31,25 +31,47 @@
     "vmSize": {
       "value": "Standard_B2ls_v2"
     },
+
     "regions": {
       "value": {
-        "wus2": "westus2",
-        "krc": "koreacentral",
-        "sdc": "swedencentral",
-        "we": "westeurope",
-        "ae": "australiaeast"
+        "region1": {
+          "location": "westus2",
+          "addressPrefix": "10.0.0.0/16",
+          "subnetPrefix": "10.0.0.0/24"
+        },
+        "region2": {
+          "location": "koreacentral",
+          "addressPrefix": "10.1.0.0/16",
+          "subnetPrefix": "10.1.0.0/24"
+        },
+        "region3": {
+          "location": "swedencentral",
+          "addressPrefix": "10.2.0.0/16",
+          "subnetPrefix": "10.2.0.0/24"
+        },
+        "region4": {
+          "location": "westeurope",
+          "addressPrefix": "10.3.0.0/16",
+          "subnetPrefix": "10.3.0.0/24"
+        },
+        "region5": {
+          "location": "australiaeast",
+          "addressPrefix": "10.4.0.0/16",
+          "subnetPrefix": "10.4.0.0/24"
+        }
       }
     },
-    "dc01RegionKey": { "value": "wus2" },
-    "dc02RegionKey": { "value": "sdc" },
-    "dc03RegionKey": { "value": "krc" },
-    "dc04RegionKey": { "value": "we" },
-    "dc05RegionKey": { "value": "ae" },
-    "windowsClient01RegionKey": { "value": "wus2" },
-    "windowsClient02RegionKey": { "value": "sdc" },
-    "ubuntu01RegionKey": { "value": "krc" },
-    "ubuntu02RegionKey": { "value": "we" },
-    "ubuntu03RegionKey": { "value": "ae" },
+
+    "dc01RegionKey": { "value": "region1" },
+    "dc02RegionKey": { "value": "region2" },
+    "dc03RegionKey": { "value": "region3" },
+    "dc04RegionKey": { "value": "region4" },
+    "dc05RegionKey": { "value": "region5" },
+    "windowsClient01RegionKey": { "value": "region1" },
+    "windowsClient02RegionKey": { "value": "region2" },
+    "ubuntu01RegionKey": { "value": "region3" },
+    "ubuntu02RegionKey": { "value": "region4" },
+    "ubuntu03RegionKey": { "value": "region5" },
 
     "windowsServerImage": {
       "value": {
