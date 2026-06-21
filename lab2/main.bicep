@@ -66,7 +66,7 @@ var vmIpArray = [
 resource rgs 'Microsoft.Resources/resourceGroups@2022-09-01' = [
   for region in items(regions): {
     name: '${prefix}-rg-${region.key}'
-    location: region.value
+    location: region.value.location
     tags: tags
   }
 ]
@@ -75,7 +75,7 @@ resource rgs 'Microsoft.Resources/resourceGroups@2022-09-01' = [
 // VNets
 //
 module vnets 'modules/networking/vnet.bicep' = [
-  for (region, i) in items(regions): {
+  for region in items(regions): {
     name: 'vnet-${region.key}'
     scope: resourceGroup('${prefix}-rg-${region.key}')
     dependsOn: [
@@ -83,9 +83,9 @@ module vnets 'modules/networking/vnet.bicep' = [
     ]
     params: {
       vnetName: '${prefix}-vnet-${region.key}'
-      location: region.value
-      addressPrefix: '10.${i}.0.0/16'
-      subnetPrefix: '10.${i}.0.0/24'
+      location: region.value.location
+      addressPrefix: region.value.addressPrefix
+      subnetPrefix: region.value.subnetPrefix
       dnsServers: []
       tags: tags
       externalAccessPrefixes: externalAccessPrefixes
@@ -444,7 +444,7 @@ module dc01 'modules/compute/vm-windows.bicep' = {
     adminPassword: adminPassword
     privateIp: vmIps.dc01
     testTargets: vmIpArray
-    location: regions[dc01RegionKey]
+    location: regions[dc01RegionKey].location
     tags: tags
    
     image: windowsServerImage     
@@ -467,7 +467,7 @@ module dc02 'modules/compute/vm-windows.bicep' = {
     privateIp: vmIps.dc02
     testTargets: vmIpArray
     tags: tags
-    location: regions[dc02RegionKey]
+    location: regions[dc02RegionKey].location
     image: windowsServerImage     
     osDisk: osDisk                
   }
@@ -487,7 +487,7 @@ module dc03 'modules/compute/vm-windows.bicep' = {
     adminPassword: adminPassword
     privateIp: vmIps.dc03
     testTargets: vmIpArray
-    location: regions[dc03RegionKey]
+    location: regions[dc03RegionKey].location
     tags: tags
 
     image: windowsServerImage     
@@ -509,7 +509,7 @@ module dc04 'modules/compute/vm-windows.bicep' = {
     adminPassword: adminPassword
     privateIp: vmIps.dc04
     testTargets: vmIpArray
-    location: regions[dc04RegionKey]
+    location: regions[dc04RegionKey].location
     tags: tags
 
     image: windowsServerImage     
@@ -531,7 +531,7 @@ module dc05 'modules/compute/vm-windows.bicep' = {
     adminPassword: adminPassword
     privateIp: vmIps.dc05
     testTargets: vmIpArray
-    location: regions[dc05RegionKey]
+    location: regions[dc05RegionKey].location
     tags: tags
 
     image: windowsServerImage     
@@ -556,7 +556,7 @@ module win01 'modules/compute/vm-windows.bicep' = {
     adminPassword: adminPassword
     privateIp: vmIps.win01
     testTargets: vmIpArray
-    location: regions[windowsClient01RegionKey]
+    location: regions[windowsClient01RegionKey].location
     tags: tags
 
     image: windowsClientImage     
@@ -578,7 +578,7 @@ module win02 'modules/compute/vm-windows.bicep' = {
     adminPassword: adminPassword
     privateIp: vmIps.win02
     testTargets: vmIpArray
-    location: regions[windowsClient02RegionKey]
+    location: regions[windowsClient02RegionKey].location
     tags: tags
 
     image: windowsClientImage     
@@ -604,7 +604,7 @@ module ubu01 'modules/compute/vm-linux.bicep' = {
     adminPassword: adminPassword
     privateIp: vmIps.ubu01
     testTargets: vmIpArray
-    location: regions[ubuntu01RegionKey]
+    location: regions[ubuntu01RegionKey].location
     tags: tags
 
     image: ubuntuImage               
@@ -626,7 +626,7 @@ module ubu02 'modules/compute/vm-linux.bicep' = {
     adminPassword: adminPassword
     privateIp: vmIps.ubu02
     testTargets: vmIpArray
-    location: regions[ubuntu02RegionKey]
+    location: regions[ubuntu02RegionKey].location
     tags: tags
 
     image: ubuntuImage               
@@ -648,7 +648,7 @@ module ubu03 'modules/compute/vm-linux.bicep' = {
     adminPassword: adminPassword
     privateIp: vmIps.ubu03
     testTargets: vmIpArray
-    location: regions[ubuntu03RegionKey]
+    location: regions[ubuntu03RegionKey].location
     tags: tags
 
     image: ubuntuImage               
