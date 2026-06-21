@@ -11,6 +11,8 @@ param privateIp string
 param testTargets array
 param location string
 
+param forceUpdateTag string = utcNow()
+
 resource nic 'Microsoft.Network/networkInterfaces@2022-07-01' = {
   name: '${vmName}-nic'
   location: resourceGroup().location
@@ -67,6 +69,8 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-08-01' = {
 
 //Enable ICMP (ping) and test network connectivity.
 
+var targetList = join(testTargets, ',')
+
 resource vmScript 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = {
   name: '${vmName}/vmScript'
   location: location
@@ -77,28 +81,15 @@ resource vmScript 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = {
     publisher: 'Microsoft.Compute'
     type: 'CustomScriptExtension'
     typeHandlerVersion: '1.10'
+    
     settings: {
-      commandToExecute: '''
-powershell -Command "
-Start-Sleep -Seconds 60
 
-# Enable ping
-Enable-NetFirewallRule -DisplayGroup 'File and Printer Sharing'
 
-# Network test
-$targets = '${join(testTargets, ',')}'
-$targets = $targets.Split(',')
-$self = '${privateIp}'
+//  commandToExecute: 'powershell -ExecutionPolicy Bypass -Command "$targets = ${targetList}; $self = ${privateIp}; New-NetFirewallRule -Name Allow-ICMPv4 -Protocol ICMPv4 -IcmpType 8 -Direction Inbound -Action Allow -ErrorAction SilentlyContinue; New-Item -Path C:\\temp -ItemType Directory -Force; Write-Output Starting network test | Out-File C:\\temp\\network-test.txt; foreach ($t in $targets) { if ($t -ne $self) { Test-NetConnection -ComputerName $t -Port 3389 | Out-File -Append C:\\temp\\network-test.txt } }"'
+    commandToExecute: 'powershell -ExecutionPolicy Bypass -Command "New-Item -Path C:\\temp -ItemType Directory -Force; Write-Output Starting network test | Out-File C:\\temp\\network-test.txt; Test-NetConnection -ComputerName localhost -Port 3389 | Out-File -Append C:\\temp\\network-test.txt"'
 
-New-Item -Path C:\temp -ItemType Directory -Force
-
-foreach ($t in $targets) {
-  if ($t -ne $self) {
-    Test-NetConnection $t -Port 3389 | Out-File -Append C:\temp\network-test.txt
-  }
-}
-"
-'''
     }
+
+    forceUpdateTag: forceUpdateTag
   }
 }
