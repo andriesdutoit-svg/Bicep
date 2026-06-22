@@ -28,36 +28,17 @@ param windowsClientImage object
 param ubuntuImage object
 
 param externalAccessPrefixes array = []
+param dcIps object
 
-//VM IPs for ping enable and testing connectivity between VMs in different regions, need to allow ICMP traffic for testing purposes.
+//VM DC IPs for ping enable and testing connectivity between VMs in different regions, need to allow ICMP traffic for testing purposes.
 
-var vmIps = {
-  dc01: '10.4.0.5'
-  dc02: '10.2.0.5'
-  dc03: '10.1.0.5'
-  dc04: '10.3.0.5'
-  dc05: '10.0.0.4'
-  win01: '10.4.0.4'
-  win02: '10.2.0.4'
-  ubu01: '10.1.0.4'
-  ubu02: '10.3.0.4'
-  ubu03: '10.0.0.5'
-}
-
-
-var vmIpArray = [
-  vmIps.dc01
-  vmIps.dc02
-  vmIps.dc03
-  vmIps.dc04
-  vmIps.dc05
-  vmIps.win01
-  vmIps.win02
-  vmIps.ubu01
-  vmIps.ubu02
-  vmIps.ubu03
+var dcIpArray = [
+  dcIps.dc01
+  dcIps.dc02
+  dcIps.dc03
+  dcIps.dc04
+  dcIps.dc05
 ]
-
 
 //
 // RESOURCE GROUPS
@@ -97,287 +78,7 @@ module vnets 'modules/networking/vnet.bicep' = [
 // PEERING (explicit)
 //
 
-//FROM region5 TO ALL OTHER REGIONS
-
-// region5 → region2
-module peering_region5_region2 'modules/peering/peering.bicep' = {
-  name: 'peering-region5-region2'
-  scope: resourceGroup('${prefix}-rg-region5')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region5'
-    remoteVnetName: '${prefix}-vnet-region2'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region2/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region2'
-  }
-}
-
-// region5 → region3
-module peering_region5_region3 'modules/peering/peering.bicep' = {
-  name: 'peering-region5-region3'
-  scope: resourceGroup('${prefix}-rg-region5')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region5'
-    remoteVnetName: '${prefix}-vnet-region3'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region3/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region3'
-  }
-}
-
-// region5 → region4
-module peering_region5_region4 'modules/peering/peering.bicep' = {
-  name: 'peering-region5-region4'
-  scope: resourceGroup('${prefix}-rg-region5')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region5'
-    remoteVnetName: '${prefix}-vnet-region4'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region4/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region4'
-  }
-}
-
-// region5 → region1
-module peering_region5_region1 'modules/peering/peering.bicep' = {
-  name: 'peering-region5-region1'
-  scope: resourceGroup('${prefix}-rg-region5')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region5'
-    remoteVnetName: '${prefix}-vnet-region1'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region1/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region1'
-  }
-}
-
-//FROM region2 TO ALL OTHER REGIONS
-
-// region2 → region5
-module peering_region2_region5 'modules/peering/peering.bicep' = {
-  name: 'peering-region2-region5'
-  scope: resourceGroup('${prefix}-rg-region2')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region2'
-    remoteVnetName: '${prefix}-vnet-region5'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region5/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region5'
-  }
-}
-
-// region2 → region1
-module peering_region2_region1 'modules/peering/peering.bicep' = {
-  name: 'peering-region2-region1'
-  scope: resourceGroup('${prefix}-rg-region2')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region2'
-    remoteVnetName: '${prefix}-vnet-region1'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region1/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region1'
-  }
-}
-
-// region2 → region4
-module peering_region2_region4 'modules/peering/peering.bicep' = {
-  name: 'peering-region2-region4'
-  scope: resourceGroup('${prefix}-rg-region2')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region2'
-    remoteVnetName: '${prefix}-vnet-region4'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region4/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region4'
-  }
-}
-
-// region2 → region3
-module peering_region2_region3 'modules/peering/peering.bicep' = {
-  name: 'peering-region2-region3'
-  scope: resourceGroup('${prefix}-rg-region2')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region2'
-    remoteVnetName: '${prefix}-vnet-region3'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region3/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region3'
-  }
-}
-
-//FROM region3 TO ALL OTHER REGIONS
-
-// region3 → region5
-module peering_region3_region5 'modules/peering/peering.bicep' = {
-  name: 'peering-region3-region5'
-  scope: resourceGroup('${prefix}-rg-region3')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region3'
-    remoteVnetName: '${prefix}-vnet-region5'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region5/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region5'
-  }
-}
-
-// region3 → region4
-module peering_region3_region4 'modules/peering/peering.bicep' = {
-  name: 'peering-region3-region4'
-  scope: resourceGroup('${prefix}-rg-region3')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region3'
-    remoteVnetName: '${prefix}-vnet-region4'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region4/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region4'
-  }
-}
-
-// region3 → region5
-module peering_region3_region5 'modules/peering/peering.bicep' = {
-  name: 'peering-region3-region5'
-  scope: resourceGroup('${prefix}-rg-region3')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region3'
-    remoteVnetName: '${prefix}-vnet-region5'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region5/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region5'
-  }
-}
-
-// region3 → region4
-module peering_region3_region4 'modules/peering/peering.bicep' = {
-  name: 'peering-region3-region4'
-  scope: resourceGroup('${prefix}-rg-region3')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region3'
-    remoteVnetName: '${prefix}-vnet-region4'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region4/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region4'
-  }
-}
-
-//FROM region4 TO ALL OTHER REGIONS
-
-// region4 → region5
-module peering_region4_region5 'modules/peering/peering.bicep' = {
-  name: 'peering-region4-region5'
-  scope: resourceGroup('${prefix}-rg-region4')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region4'
-    remoteVnetName: '${prefix}-vnet-region5'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region5/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region5'
-  }
-}
-
-// region4 → region2
-module peering_region4_region2 'modules/peering/peering.bicep' = {
-  name: 'peering-region4-region2'
-  scope: resourceGroup('${prefix}-rg-region4')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region4'
-    remoteVnetName: '${prefix}-vnet-region2'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region2/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region2'
-  }
-}
-
-// region4 → region3
-module peering_region4_region3 'modules/peering/peering.bicep' = {
-  name: 'peering-region4-region3'
-  scope: resourceGroup('${prefix}-rg-region4')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region4'
-    remoteVnetName: '${prefix}-vnet-region3'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region3/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region3'
-  }
-}
-
-// region4 → region1
-module peering_region4_region1 'modules/peering/peering.bicep' = {
-  name: 'peering-region4-region1'
-  scope: resourceGroup('${prefix}-rg-region4')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region4'
-    remoteVnetName: '${prefix}-vnet-region1'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region1/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region1'
-  }
-}
-
 //FROM region1 TO ALL OTHER REGIONS
-
-// region1 → region 5
-module peering_region1_region5 'modules/peering/peering.bicep' = {
-  name: 'peering-region1-region5'
-  scope: resourceGroup('${prefix}-rg-region1')
-
-  dependsOn: [
-    vnets
-  ]
-
-  params: {
-    vnetName: '${prefix}-vnet-region1'
-    remoteVnetName: '${prefix}-vnet-region5'
-    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region5/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region5'
-  }
-}
 
 // region1 → region2
 module peering_region1_region2 'modules/peering/peering.bicep' = {
@@ -427,6 +128,285 @@ module peering_region1_region4 'modules/peering/peering.bicep' = {
   }
 }
 
+// region1 → region 5
+module peering_region1_region5 'modules/peering/peering.bicep' = {
+  name: 'peering-region1-region5'
+  scope: resourceGroup('${prefix}-rg-region1')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region1'
+    remoteVnetName: '${prefix}-vnet-region5'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region5/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region5'
+  }
+}
+
+//FROM region2 TO ALL OTHER REGIONS
+
+// region2 → region1
+module peering_region2_region1 'modules/peering/peering.bicep' = {
+  name: 'peering-region2-region1'
+  scope: resourceGroup('${prefix}-rg-region2')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region2'
+    remoteVnetName: '${prefix}-vnet-region1'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region1/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region1'
+  }
+}
+
+// region2 → region3
+module peering_region2_region3 'modules/peering/peering.bicep' = {
+  name: 'peering-region2-region3'
+  scope: resourceGroup('${prefix}-rg-region2')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region2'
+    remoteVnetName: '${prefix}-vnet-region3'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region3/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region3'
+  }
+}
+
+// region2 → region4
+module peering_region2_region4 'modules/peering/peering.bicep' = {
+  name: 'peering-region2-region4'
+  scope: resourceGroup('${prefix}-rg-region2')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region2'
+    remoteVnetName: '${prefix}-vnet-region4'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region4/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region4'
+  }
+}
+
+// region2 → region5
+module peering_region2_region5 'modules/peering/peering.bicep' = {
+  name: 'peering-region2-region5'
+  scope: resourceGroup('${prefix}-rg-region2')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region2'
+    remoteVnetName: '${prefix}-vnet-region5'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region5/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region5'
+  }
+}
+
+//FROM region3 TO ALL OTHER REGIONS
+
+// region3 → region1
+module peering_region3_region1 'modules/peering/peering.bicep' = {
+  name: 'peering-region3-region1'
+  scope: resourceGroup('${prefix}-rg-region3')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region3'
+    remoteVnetName: '${prefix}-vnet-region1'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region1/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region1'
+  }
+}
+
+// region3 → region2
+module peering_region3_region2 'modules/peering/peering.bicep' = {
+  name: 'peering-region3-region2'
+  scope: resourceGroup('${prefix}-rg-region3')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region3'
+    remoteVnetName: '${prefix}-vnet-region2'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region2/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region2'
+  }
+}
+
+// region3 → region4
+module peering_region3_region4 'modules/peering/peering.bicep' = {
+  name: 'peering-region3-region4'
+  scope: resourceGroup('${prefix}-rg-region3')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region3'
+    remoteVnetName: '${prefix}-vnet-region4'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region4/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region4'
+  }
+}
+
+// region3 → region5
+module peering_region3_region5 'modules/peering/peering.bicep' = {
+  name: 'peering-region3-region5'
+  scope: resourceGroup('${prefix}-rg-region3')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region3'
+    remoteVnetName: '${prefix}-vnet-region5'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region5/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region5'
+  }
+}
+
+//FROM region4 TO ALL OTHER REGIONS
+
+// region4 → region1
+module peering_region4_region1 'modules/peering/peering.bicep' = {
+  name: 'peering-region4-region1'
+  scope: resourceGroup('${prefix}-rg-region4')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region4'
+    remoteVnetName: '${prefix}-vnet-region1'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region1/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region1'
+  }
+}
+
+// region4 → region2
+module peering_region4_region2 'modules/peering/peering.bicep' = {
+  name: 'peering-region4-region2'
+  scope: resourceGroup('${prefix}-rg-region4')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region4'
+    remoteVnetName: '${prefix}-vnet-region2'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region2/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region2'
+  }
+}
+
+// region4 → region3
+module peering_region4_region3 'modules/peering/peering.bicep' = {
+  name: 'peering-region4-region3'
+  scope: resourceGroup('${prefix}-rg-region4')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region4'
+    remoteVnetName: '${prefix}-vnet-region3'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region3/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region3'
+  }
+}
+
+// region4 → region5
+module peering_region4_region5 'modules/peering/peering.bicep' = {
+  name: 'peering-region4-region5'
+  scope: resourceGroup('${prefix}-rg-region4')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region4'
+    remoteVnetName: '${prefix}-vnet-region5'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region5/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region5'
+  }
+}
+
+//FROM region5 TO ALL OTHER REGIONS
+
+// region5 → region1
+module peering_region5_region1 'modules/peering/peering.bicep' = {
+  name: 'peering-region5-region1'
+  scope: resourceGroup('${prefix}-rg-region5')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region5'
+    remoteVnetName: '${prefix}-vnet-region1'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region1/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region1'
+  }
+}
+
+// region5 → region2
+module peering_region5_region2 'modules/peering/peering.bicep' = {
+  name: 'peering-region5-region2'
+  scope: resourceGroup('${prefix}-rg-region5')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region5'
+    remoteVnetName: '${prefix}-vnet-region2'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region2/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region2'
+  }
+}
+
+// region5 → region3
+module peering_region5_region3 'modules/peering/peering.bicep' = {
+  name: 'peering-region5-region3'
+  scope: resourceGroup('${prefix}-rg-region5')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region5'
+    remoteVnetName: '${prefix}-vnet-region3'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region3/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region3'
+  }
+}
+
+// region5 → region4
+module peering_region5_region4 'modules/peering/peering.bicep' = {
+  name: 'peering-region5-region4'
+  scope: resourceGroup('${prefix}-rg-region5')
+
+  dependsOn: [
+    vnets
+  ]
+
+  params: {
+    vnetName: '${prefix}-vnet-region5'
+    remoteVnetName: '${prefix}-vnet-region4'
+    remoteVnetId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${prefix}-rg-region4/providers/Microsoft.Network/virtualNetworks/${prefix}-vnet-region4'
+  }
+}
 //
 // DOMAIN CONTROLLERS
 //
@@ -442,8 +422,8 @@ module dc01 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
-    privateIp: vmIps.dc01
-    testTargets: vmIpArray
+    privateIp: dcIps.dc01
+    testTargets: dcIpArray
     location: regions[dc01RegionKey].location
     tags: tags
    
@@ -464,8 +444,8 @@ module dc02 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
-    privateIp: vmIps.dc02
-    testTargets: vmIpArray
+    privateIp: dcIps.dc02
+    testTargets: dcIpArray
     tags: tags
     location: regions[dc02RegionKey].location
     image: windowsServerImage     
@@ -485,8 +465,8 @@ module dc03 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
-    privateIp: vmIps.dc03
-    testTargets: vmIpArray
+    privateIp: dcIps.dc03
+    testTargets: dcIpArray
     location: regions[dc03RegionKey].location
     tags: tags
 
@@ -507,8 +487,8 @@ module dc04 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
-    privateIp: vmIps.dc04
-    testTargets: vmIpArray
+    privateIp: dcIps.dc04
+    testTargets: dcIpArray
     location: regions[dc04RegionKey].location
     tags: tags
 
@@ -529,8 +509,8 @@ module dc05 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
-    privateIp: vmIps.dc05
-    testTargets: vmIpArray
+    privateIp: dcIps.dc05
+    testTargets: dcIpArray
     location: regions[dc05RegionKey].location
     tags: tags
 
@@ -554,8 +534,8 @@ module win01 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
-    privateIp: vmIps.win01
-    testTargets: vmIpArray
+    privateIp: ''
+    testTargets: []
     location: regions[windowsClient01RegionKey].location
     tags: tags
 
@@ -576,8 +556,8 @@ module win02 'modules/compute/vm-windows.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
-    privateIp: vmIps.win02
-    testTargets: vmIpArray
+    privateIp: ''
+    testTargets: []
     location: regions[windowsClient02RegionKey].location
     tags: tags
 
@@ -602,8 +582,8 @@ module ubu01 'modules/compute/vm-linux.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
-    privateIp: vmIps.ubu01
-    testTargets: vmIpArray
+    privateIp: ''
+    testTargets: []
     location: regions[ubuntu01RegionKey].location
     tags: tags
 
@@ -624,8 +604,8 @@ module ubu02 'modules/compute/vm-linux.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
-    privateIp: vmIps.ubu02
-    testTargets: vmIpArray
+    privateIp: ''
+    testTargets: []
     location: regions[ubuntu02RegionKey].location
     tags: tags
 
@@ -646,8 +626,8 @@ module ubu03 'modules/compute/vm-linux.bicep' = {
     vmSize: vmSize
     adminUsername: adminUsername
     adminPassword: adminPassword
-    privateIp: vmIps.ubu03
-    testTargets: vmIpArray
+    privateIp: ''
+    testTargets: []
     location: regions[ubuntu03RegionKey].location
     tags: tags
 

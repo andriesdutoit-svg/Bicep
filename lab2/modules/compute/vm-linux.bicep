@@ -21,7 +21,8 @@ resource nic 'Microsoft.Network/networkInterfaces@2022-07-01' = {
       {
         name: 'ipconfig1'
         properties: {
-          privateIPAllocationMethod: 'Dynamic'
+          privateIPAllocationMethod: empty(privateIp) ? 'Dynamic' : 'Static'
+          privateIPAddress: empty(privateIp) ? null : privateIp
           subnet: {
             id: resourceId(
               'Microsoft.Network/virtualNetworks/subnets',

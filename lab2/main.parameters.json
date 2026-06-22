@@ -73,6 +73,18 @@
     "ubuntu02RegionKey": { "value": "region4" },
     "ubuntu03RegionKey": { "value": "region5" },
 
+    "dcIps": {
+      "value": {
+        "dc01": "10.0.0.10",
+        "dc02": "10.1.0.10",
+        "dc03": "10.2.0.10",
+        "dc04": "10.3.0.10",
+        "dc05": "10.4.0.10"
+      }
+    }
+
+},
+
     "windowsServerImage": {
       "value": {
         "publisher": "MicrosoftWindowsServer",
