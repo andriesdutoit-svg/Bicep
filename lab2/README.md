@@ -1,60 +1,170 @@
-# Azure Multi-Region Lab (v1.5)
+# Azure Multi-Region Lab (Bicep) – Lab v1.5.1
 
 ## Overview
+This project deploys a multi-region Azure environment using Bicep, including:
 
-This project deploys a multi-region Azure environment using Bicep, including networking, compute, and automated post-deployment validation.
-
-Version 1.5 introduces a fully automated Infrastructure as Code (IaC) deployment, replacing the previously manual setup.
-
----
-
-## Architecture
-
-- 5 Azure regions
-- Separate resource group per region
-- One VNet per region
-- Full mesh VNet peering (defined in Bicep)
-- Domain Controllers, Windows clients, and Linux servers deployed across regions
+- Multiple resource groups across regions
+- Virtual networks with deterministic address spaces
+- Full mesh VNet peering
+- Windows and Linux virtual machines
+- Static IP assignment for Domain Controllers
+- Automated connectivity validation using Custom Script Extensions
 
 ---
 
 ## Key Features
 
-### Infrastructure as Code
-- Modular Bicep templates
-- Subscription-level deployment
-- Consistent naming and tagging strategy (`project=lab2`)
+### Deterministic Network Design
+Each region is explicitly defined with its own address space and subnet:
 
-### Networking
-- Multi-region VNet architecture
-- Full mesh VNet peering (manually defined in Bicep)
-- Network Security Groups configured for required traffic
+```
+region1 → 10.0.0.0/24  
+region2 → 10.1.0.0/24  
+region3 → 10.2.0.0/24  
+region4 → 10.3.0.0/24  
+region5 → 10.4.0.0/24  
+```
 
-### Compute
-- Windows Server (Domain Controllers)
-- Windows client VMs
-- Ubuntu Linux servers
+- No dependency on loop ordering  
+- Predictable addressing  
+- Repeatable deployments  
 
-### Connectivity Enablement
-- RDP (port 3389) enabled via NSGs
+---
 
-### Automated Connectivity Testing
-- Windows VMs:
-  - PowerShell test scripts
-  - Output: `C:\temp\network-test.txt`
-- Linux VMs:
-  - `nc` (netcat) port testing
-  - Output: `/tmp/network-test/network-test.txt`
+### Static IP Assignment (Domain Controllers)
+Domain Controllers are assigned fixed IP addresses:
 
-Cross-VM connectivity is validated automatically after deployment.
+```
+dc01 → 10.0.0.10  
+dc02 → 10.1.0.10  
+dc03 → 10.2.0.10  
+dc04 → 10.3.0.10  
+dc05 → 10.4.0.10  
+```
+
+- Ensures consistent identity  
+- Eliminates randomness  
+- Supports reliable connectivity testing  
+
+---
+
+### Externalised Script Execution
+Connectivity testing is implemented using an external PowerShell script:
+
+```
+scripts/network-test.ps1
+```
+
+Benefits:
+
+- Avoids Bicep string escaping issues  
+- Improves maintainability  
+- Separates logic from infrastructure  
+- Aligns with production practices  
+
+---
+
+### Automated Connectivity Validation
+Each Domain Controller:
+
+- Receives a list of all DC IPs  
+- Tests TCP connectivity (Port 3389)  
+- Logs results to:
+
+```
+C:\temp\network-test.txt
+```
+
+Non-DC VMs:
+
+- Receive an empty target list  
+- Exit immediately (no unnecessary execution)  
+
+---
+
+## Project Structure
+
+```
+lab2/
+│
+├── main.bicep
+├── main.parameters.json
+├── test.parameters.json
+│
+├── modules/
+│   ├── compute/
+│   ├── networking/
+│   └── peering/
+│
+└── scripts/
+    └── network-test.ps1
+```
 
 ---
 
 ## Deployment
 
-```bash
-az deployment sub create \
-  --name lab2-v1-5 \
-  --location westeurope \
-  --template-file main.bicep \
-  --parameters @main.parameters.json
+### Prerequisites
+
+- Azure CLI installed  
+- Logged in to Azure (`az login`)  
+- Sufficient subscription permissions  
+
+---
+
+### Deploy
+
+```powershell
+az deployment sub create `
+  --name lab-deploy `
+  --location westeurope `
+  --template-file main.bicep `
+  --parameters "@main.parameters.json"
+```
+
+---
+
+## Validation
+
+Log into any Domain Controller and run:
+
+```powershell
+type C:\temp\network-test.txt
+```
+
+Expected output:
+
+```
+Starting network test
+
+ComputerName     : 10.x.x.x
+TcpTestSucceeded : True
+```
+
+---
+
+## Versioning
+
+### v1.5
+- Initial working version  
+- Inline PowerShell in Bicep  
+- Functional but fragile scripting  
+
+### v1.5.1
+- Moved connectivity test to external PowerShell script  
+- Fixed Bicep string parsing and escaping issues  
+- Improved reliability of Custom Script Extension  
+- Implemented production-style script execution  
+
+---
+
+## Design Principles
+
+- Infrastructure as Code (IaC)  
+- Parameter-driven configuration  
+- Deterministic networking  
+- Separation of concerns (infrastructure vs scripts)  
+- Reproducible deployments  
+
+---
+
