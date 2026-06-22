@@ -1,6 +1,6 @@
 targetScope = 'subscription'
 @description('Prefix for all resources')
-param prefix string = 'lab2'
+param prefix string
 param tags object
 
 param adminUsername string
@@ -30,7 +30,9 @@ param ubuntuImage object
 param externalAccessPrefixes array = []
 param dcIps object
 
-//VM DC IPs for ping enable and testing connectivity between VMs in different regions, need to allow ICMP traffic for testing purposes.
+var finalTags = union(tags, {
+  project: prefix
+})
 
 var dcIpArray = [
   dcIps.dc01
@@ -48,7 +50,7 @@ resource rgs 'Microsoft.Resources/resourceGroups@2022-09-01' = [
   for region in items(regions): {
     name: '${prefix}-rg-${region.key}'
     location: region.value.location
-    tags: tags
+    tags: finalTags
   }
 ]
 
@@ -68,7 +70,7 @@ module vnets 'modules/networking/vnet.bicep' = [
       addressPrefix: region.value.addressPrefix
       subnetPrefix: region.value.subnetPrefix
       dnsServers: []
-      tags: tags
+      tags: finalTags
       externalAccessPrefixes: externalAccessPrefixes
     }
   }
@@ -425,7 +427,7 @@ module dc01 'modules/compute/vm-windows.bicep' = {
     privateIp: dcIps.dc01
     testTargets: dcIpArray
     location: regions[dc01RegionKey].location
-    tags: tags
+    tags: finalTags
    
     image: windowsServerImage     
     osDisk: osDisk                
@@ -446,7 +448,7 @@ module dc02 'modules/compute/vm-windows.bicep' = {
     adminPassword: adminPassword
     privateIp: dcIps.dc02
     testTargets: dcIpArray
-    tags: tags
+    tags: finalTags
     location: regions[dc02RegionKey].location
     image: windowsServerImage     
     osDisk: osDisk                
@@ -468,7 +470,7 @@ module dc03 'modules/compute/vm-windows.bicep' = {
     privateIp: dcIps.dc03
     testTargets: dcIpArray
     location: regions[dc03RegionKey].location
-    tags: tags
+    tags: finalTags
 
     image: windowsServerImage     
     osDisk: osDisk                
@@ -490,7 +492,7 @@ module dc04 'modules/compute/vm-windows.bicep' = {
     privateIp: dcIps.dc04
     testTargets: dcIpArray
     location: regions[dc04RegionKey].location
-    tags: tags
+    tags: finalTags
 
     image: windowsServerImage     
     osDisk: osDisk                
@@ -512,7 +514,7 @@ module dc05 'modules/compute/vm-windows.bicep' = {
     privateIp: dcIps.dc05
     testTargets: dcIpArray
     location: regions[dc05RegionKey].location
-    tags: tags
+    tags: finalTags
 
     image: windowsServerImage     
     osDisk: osDisk                
@@ -537,7 +539,7 @@ module win01 'modules/compute/vm-windows.bicep' = {
     privateIp: ''
     testTargets: []
     location: regions[windowsClient01RegionKey].location
-    tags: tags
+    tags: finalTags
 
     image: windowsClientImage     
     osDisk: osDisk                
@@ -559,7 +561,7 @@ module win02 'modules/compute/vm-windows.bicep' = {
     privateIp: ''
     testTargets: []
     location: regions[windowsClient02RegionKey].location
-    tags: tags
+    tags: finalTags
 
     image: windowsClientImage     
     osDisk: osDisk                
@@ -585,7 +587,7 @@ module ubu01 'modules/compute/vm-linux.bicep' = {
     privateIp: ''
     testTargets: []
     location: regions[ubuntu01RegionKey].location
-    tags: tags
+    tags: finalTags
 
     image: ubuntuImage               
     osDisk: osDisk                 
@@ -607,7 +609,7 @@ module ubu02 'modules/compute/vm-linux.bicep' = {
     privateIp: ''
     testTargets: []
     location: regions[ubuntu02RegionKey].location
-    tags: tags
+    tags: finalTags
 
     image: ubuntuImage               
     osDisk: osDisk                 
@@ -629,7 +631,7 @@ module ubu03 'modules/compute/vm-linux.bicep' = {
     privateIp: ''
     testTargets: []
     location: regions[ubuntu03RegionKey].location
-    tags: tags
+    tags: finalTags
 
     image: ubuntuImage               
     osDisk: osDisk                 
