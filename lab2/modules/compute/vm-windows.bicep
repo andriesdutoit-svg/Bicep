@@ -70,7 +70,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-08-01' = {
 
 //Placeholder extension for future network testing.
 
-var targetList = join(testTargets, ',')
+// var targetList = join(testTargets, ',')
 
 resource vmScript 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = {
   name: '${vmName}/vmScript'

@@ -14,12 +14,11 @@
       ]
     },
     "prefix": {
-      "value": "lab2"
+      "value": "lab3"
     },
     "tags": {
       "value": {
-        "environment": "lab",
-        "project": "lab2"
+        "environment": "lab"
       }
     },
     "adminUsername": {
@@ -81,9 +80,7 @@
         "dc04": "10.3.0.10",
         "dc05": "10.4.0.10"
       }
-    }
-
-},
+    },
 
     "windowsServerImage": {
       "value": {
@@ -115,3 +112,4 @@
       }
     }
   }
+}
