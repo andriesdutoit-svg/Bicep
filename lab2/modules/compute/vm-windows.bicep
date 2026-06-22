@@ -85,7 +85,7 @@ resource vmScript 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = {
     
     settings: {
       fileUris: [
-        'https://raw.githubusercontent.com/ut-azure-devops/bicep/main/lab2/modules/compute/network-test.ps1'
+        'https://raw.githubusercontent.com/andriesdutoit-svg/Bicep/master/lab2/scripts/network-test.ps1'
       ]
       commandToExecute: 'powershell -ExecutionPolicy Bypass -File network-test.ps1 -targets "${targetList}" -selfIp "${privateIp}"'
   }
